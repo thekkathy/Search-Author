@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 
 function App() {
-  const [title, setTitle] = useState("your book");
-  const [author, setAuthor] = useState(null);
+  const [title, setTitle] = useState("");
+  const [bookTitle, setBookTitle] = useState("your book");
+  const [author, setAuthor] = useState([]);
 
   const apiFetch = async () => {
     try {
@@ -15,8 +16,9 @@ function App() {
             setAuthor("Book not in database");
           }
           else {
-            setAuthor(obj[0].author);
-
+            setBookTitle(obj[0].volumeInfo.title)
+            setAuthor(obj[0].volumeInfo.authors);
+            console.log("author" + obj[0].volumeInfo.authors);
           }
         })
     } catch (error) {
@@ -27,23 +29,7 @@ function App() {
 
   const apiFetchOnEnter = async (e) => {
     if (e.key === 'Enter') {
-      try {
-        await fetch(`http://localhost:8000/books?title=${title}`)
-          .then(
-            resp => { return resp.json() }
-          )
-          .then((obj) => {
-            if (obj.length === 0) {
-              setAuthor("Book not in database");
-            }
-            else {
-              setAuthor(obj[0].author);
-
-            }
-          })
-      } catch (error) {
-        console.log(error);
-      }
+      apiFetch();
     }
   }
 
@@ -81,8 +67,14 @@ function App() {
           </div>
           <div className="row m-4 justify-content-center">
             <div className="container">
-              <p className="h3 font-weight-light">The author of {title} is: </p>
-              <p className="h3 font-weight-normal">{author !== "undefined" && author}</p>
+              <p className="h3 font-weight-light">The author(s) of {bookTitle} is: </p>
+              <div className="h3 font-weight-normal">
+                {author && Array.isArray(author) ?
+                  author.map(a => {
+                    return <p key={a}>{a}</p>
+                  }):
+                <p>Cannot find book, please try another title</p>}
+              </div>
             </div>
           </div>
         </div>
